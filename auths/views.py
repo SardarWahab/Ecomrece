@@ -89,7 +89,7 @@ def login_user(request):
             if user:
                 login(request, user)
                 messages.success(request, "Login successful!")
-                return redirect("blog_list")
+                return redirect("home")
             else:
                 messages.error(request, "Invalid email or password.")
         except User.DoesNotExist:
