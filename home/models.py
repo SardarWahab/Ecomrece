@@ -1,12 +1,20 @@
 from django.db import models
 from django.conf import settings 
+from django.utils.text import slugify
+
 User = settings.AUTH_USER_MODEL  
-# Create your models here.
+
 # Store Model
 class Store(models.Model):
     store_name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, blank=True)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='store')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.store_name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.store_name
@@ -15,10 +23,16 @@ class Store(models.Model):
 class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -37,9 +51,15 @@ class CartItem(models.Model):
 # Order Model
 class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    slug = models.SlugField(unique=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Delivered', 'Delivered')], default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f'order-{self.id}-{self.customer.username}')
+        super().save(*args, **kwargs)
 
 # OrderItem Model
 class OrderItem(models.Model):

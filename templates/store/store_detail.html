@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ store.store_name }}</h2>
+    <p><strong>Owner:</strong> {{ store.owner.username }}</p>
+    
+    <h3>Products</h3>
+    {% if products %}
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description }}</p>
+                            <p><strong>Price:</strong> ${{ product.price }}</p>
+                            <p><strong>Stock:</strong> {{ product.stock }}</p>
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No products available in this store.</p>
+    {% endif %}
+    
+    <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Back to Home</a>
+</div>
+{% endblock %}

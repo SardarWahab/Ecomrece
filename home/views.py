@@ -1,13 +1,18 @@
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Store, Product, Cart, CartItem, Order, OrderItem, Payment
+from django.utils.text import slugify
 
 # Home Page
 def home(request):
     products = Product.objects.all()
     return render(request, 'auth/home.html', {'products': products})
+
+def about_view(request):
+    return render(request, 'About.html')
+
+def contact_view(request):
+    return render(request, 'contact.html')
 
 # Store Creation
 @login_required
@@ -15,15 +20,16 @@ def create_store(request):
     if request.method == 'POST':
         store_name = request.POST.get('store_name')
         if store_name and not hasattr(request.user, 'store'):
-            Store.objects.create(owner=request.user, store_name=store_name)
-            return redirect('store_detail', store_id=request.user.store.id)
-    return render(request, 'home/create_store.html')
+            slug = slugify(store_name)
+            store = Store.objects.create(owner=request.user, store_name=store_name, slug=slug)
+            return redirect('store_detail', store_slug=store.slug)
+    return render(request, 'store/create_store.html')
 
 # Store Detail
-def store_detail(request, store_id):
-    store = get_object_or_404(Store, id=store_id)
+def store_detail(request, slug):
+    store = get_object_or_404(Store, slug=slug)
     products = store.products.all()
-    return render(request, 'home/store_detail.html', {'store': store, 'products': products})
+    return render(request, 'store/store_detail.html', {'store': store, 'products': products})
 
 # Add Product (For Seller)
 @login_required
@@ -34,25 +40,27 @@ def add_product(request):
         price = request.POST.get('price')
         stock = request.POST.get('stock')
         if name and price and stock:
+            slug = slugify(name)
             Product.objects.create(
                 store=request.user.store,
                 name=name,
+                slug=slug,
                 description=description,
                 price=price,
                 stock=stock
             )
-            return redirect('store_detail', store_id=request.user.store.id)
+            return redirect('store_detail', slug=request.user.store.slug)
     return render(request, 'home/add_product.html')
 
 # Product Detail
-def product_detail(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+def product_detail(request, slug):
+    product = get_object_or_404(Product, slug=slug)
     return render(request, 'home/product_detail.html', {'product': product})
 
 # Add to Cart
 @login_required
-def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+def add_to_cart(request, slug):
+    product = get_object_or_404(Product, slug=slug)
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
     cart_item.quantity += 1
