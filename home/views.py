@@ -27,8 +27,11 @@ def create_store(request):
 
 # Store Detail
 def store_detail(request, store_slug):
-    store = Store.objects.get(slug=store_slug)
-    return render(request, 'store/store_detail.html', {'store': store})
+    store = get_object_or_404(Store, slug=store_slug)
+    store_products = store.products.all()  # Fetch only products related to this store
+    return render(request, 'store/store_detail.html', {'store': store, 'store_products': store_products})
+
+
 
 
 # Add Product (For Seller)
