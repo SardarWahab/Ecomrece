@@ -26,10 +26,10 @@ def create_store(request):
     return render(request, 'store/create_store.html')
 
 # Store Detail
-def store_detail(request, slug):
-    store = get_object_or_404(Store, slug=slug)
-    products = store.products.all()
-    return render(request, 'store/store_detail.html', {'store': store, 'products': products})
+def store_detail(request, store_slug):
+    store = Store.objects.get(slug=store_slug)
+    return render(request, 'store/store_detail.html', {'store': store})
+
 
 # Add Product (For Seller)
 @login_required
