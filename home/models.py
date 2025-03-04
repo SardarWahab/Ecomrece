@@ -20,6 +20,9 @@ class Store(models.Model):
         return self.store_name
 
 # Product Model
+from django.db import models
+from django.utils.text import slugify
+
 class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
@@ -27,6 +30,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
+    image = models.ImageField(upload_to='product_images/', null=True, blank=True)  # Image field added
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

@@ -50,12 +50,12 @@ def add_product(request):
                 stock=stock
             )
             return redirect('store_detail', slug=request.user.store.slug)
-    return render(request, 'home/add_product.html')
+    return render(request, 'store/add_product.html')
 
 # Product Detail
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug)
-    return render(request, 'home/product_detail.html', {'product': product})
+    return render(request, 'store/product_detail.html', {'product': product})
 
 # Add to Cart
 @login_required

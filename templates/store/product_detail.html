@@ -1,0 +1,28 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/300" class="img-fluid rounded" alt="No image available">
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h1>{{ product.name }}</h1>
+                <p><strong>Store:</strong> <a href="{% url 'store_detail' product.store.slug %}">{{ product.store.store_name }}</a></p>
+                <p><strong>Description:</strong> {{ product.description }}</p>
+                <p><strong>Price:</strong> ${{ product.price }}</p>
+                <p><strong>Stock Available:</strong> {{ product.stock }}</p>
+
+                {% if product.stock > 0 %}
+                    <a href="{% url 'add_to_cart' product.slug %}" class="btn btn-success">Add to Cart</a>
+                {% else %}
+                    <button class="btn btn-danger" disabled>Out of Stock</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
