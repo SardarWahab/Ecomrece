@@ -5,9 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 import uuid
-
 User = get_user_model()
-
 def register_user(request):
     if request.method == "POST":
         email = request.POST.get("email")
