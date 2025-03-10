@@ -13,6 +13,7 @@ def register_user(request):
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
 
+        
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return redirect("register")
