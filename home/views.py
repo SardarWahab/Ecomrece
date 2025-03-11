@@ -32,8 +32,6 @@ def store_detail(request, store_slug):
     return render(request, 'store/store_detail.html', {'store': store, 'store_products': store_products})
 
 
-
-
 # Add Product (For Seller)
 @login_required
 def add_product(request):
@@ -61,21 +59,25 @@ def product_detail(request, slug):
     return render(request, 'store/product_detail.html', {'product': product})
 
 # Add to Cart
+from django.urls import reverse  # ✅ Import reverse
+
 @login_required
-def add_to_cart(request, slug):
-    product = get_object_or_404(Product, slug=slug)
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-    cart_item.quantity += 1
-    cart_item.save()
-    return redirect('cart_detail')
+def add_to_cart(request, product_slug):  # ✅ Use product_slug
+    product = get_object_or_404(Product, slug=product_slug)  
+    cart, created = Cart.objects.get_or_create(user=request.user)  
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)  
+    cart_item.quantity += 1  
+    cart_item.save()  
+
+    return redirect(reverse('cart_detail'))  # ✅ Correct redirect
+
 
 # View Cart
 @login_required
 def cart_detail(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = cart.items.all()
-    return render(request, 'home/cart.html', {'cart_items': cart_items})
+    return render(request, 'store/cart.html', {'cart_items': cart_items})
 
 # Remove from Cart
 @login_required
