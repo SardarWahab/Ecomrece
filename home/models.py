@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings 
 from django.utils.text import slugify
+import uuid
 
 User = settings.AUTH_USER_MODEL  
 
@@ -54,15 +55,15 @@ class CartItem(models.Model):
 
 # Order Model
 class Order(models.Model):
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-    slug = models.SlugField(unique=True, blank=True)
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Delivered', 'Delivered')], default='Pending')
-    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default='Pending')
+    slug = models.SlugField(unique=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # ✅ Fix: Add this field
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f'order-{self.id}-{self.customer.username}')
+            self.slug = slugify(str(uuid.uuid4())[:8])
         super().save(*args, **kwargs)
 
 # OrderItem Model

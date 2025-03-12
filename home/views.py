@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Store, Product, Cart, CartItem, Order, OrderItem, Payment
 from django.utils.text import slugify
+import uuid
 
 # Home Page
 def home(request):
@@ -88,20 +89,21 @@ def remove_from_cart(request, cart_item_id):
     return redirect('cart_detail')
 
 # Checkout & Place Order
-@login_required
+
+
 def place_order(request):
-    cart = get_object_or_404(Cart, user=request.user)
-    if cart.items.exists():
-        total_price = sum(item.product.price * item.quantity for item in cart.items.all())
-        order = Order.objects.create(customer=request.user, total_price=total_price, status='Pending')
+    if request.method == "POST":
+        total_price = 100  # Example price, replace with actual logic
+        unique_slug = slugify(str(uuid.uuid4())[:8])  # Generate a unique slug
+        
+        order = Order.objects.create(
+            customer=request.user,
+            total_price=total_price,
+            status='Pending',
+            slug=unique_slug
+        )
+        return redirect('order_detail', slug=order.slug)
 
-        for item in cart.items.all():
-            OrderItem.objects.create(order=order, product=item.product, quantity=item.quantity, price=item.product.price)
-
-        cart.items.all().delete()  # Clear the cart after order
-        return redirect('order_detail', order_id=order.id)
-
-    return redirect('cart_detail')
 
 # Order Detail
 @login_required

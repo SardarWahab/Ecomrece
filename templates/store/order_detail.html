@@ -1,0 +1,22 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Order Details</h2>
+    <p><strong>Order ID:</strong> {{ order.id }}</p>
+    <p><strong>Total Price:</strong> ${{ order.total_price }}</p>
+    <p><strong>Status:</strong> {{ order.status }}</p>
+    <p><strong>Customer:</strong> {{ order.customer.username }}</p>
+
+    <h3>Order Items:</h3>
+    <ul>
+        {% for item in order.order_items.all %}
+            <li>{{ item.product.name }} - {{ item.quantity }} x ${{ item.product.price }}</li>
+        {% empty %}
+            <li>No items in this order.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+</div>
+{% endblock %}
