@@ -8,7 +8,7 @@
     <p><strong>Status:</strong> {{ order.status }}</p>
     <p><strong>Customer:</strong> {{ order.customer.username }}</p>
 
-    <h3>Order Items:</h3>
+    <h3>Order Items: </h3>
     <ul>
         {% for item in order.order_items.all %}
             <li>{{ item.product.name }} - {{ item.quantity }} x ${{ item.product.price }}</li>
