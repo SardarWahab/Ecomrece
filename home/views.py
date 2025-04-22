@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Store, Product, Cart, CartItem, Order, OrderItem, Payment
 from django.utils.text import slugify
+
 import uuid
 
 # Home Page
@@ -21,9 +23,22 @@ def create_store(request):
     if request.method == 'POST':
         store_name = request.POST.get('store_name')
         if store_name and not hasattr(request.user, 'store'):
-            slug = slugify(store_name)
-            store = Store.objects.create(owner=request.user, store_name=store_name, slug=slug)
-            return redirect('store_detail', store_slug=store.slug)
+            base_slug = slugify(store_name)
+            slug = base_slug
+            counter = 1
+
+            # Ensure slug is unique
+            while Store.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            try:
+                store = Store.objects.create(owner=request.user, store_name=store_name, slug=slug)
+                messages.success(request, "Store created successfully!")
+                return redirect('store_detail', store_slug=store.slug)
+            except Exception as e:
+                messages.error(request, f"Error creating store: {e}")
+
     return render(request, 'store/create_store.html')
 
 # Store Detail
@@ -31,8 +46,6 @@ def store_detail(request, store_slug):
     store = get_object_or_404(Store, slug=store_slug)
     store_products = store.products.all()  # Fetch only products related to this store
     return render(request, 'store/store_detail.html', {'store': store, 'store_products': store_products})
-
-
 # Add Product (For Seller)
 @login_required
 def add_product(request):
@@ -91,6 +104,7 @@ def remove_from_cart(request, cart_item_id):
 # Checkout & Place Order
 
 
+@login_required
 def place_order(request):
     if request.method == "POST":
         total_price = 100  # Example price, replace with actual logic
@@ -102,7 +116,10 @@ def place_order(request):
             status='Pending',
             slug=unique_slug
         )
-        return redirect('order_detail', slug=order.slug)
+        return redirect('order_detail', order_id=order.id)  # Use order ID instead of slug if needed
+
+    # Handle GET requests by rendering a template
+    return render(request, "store/order_detail.html")
 
 
 # Order Detail
