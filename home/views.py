@@ -107,18 +107,36 @@ def remove_from_cart(request, cart_item_id):
 @login_required
 def place_order(request):
     if request.method == "POST":
-        total_price = 100  # Example price, replace with actual logic
-        unique_slug = slugify(str(uuid.uuid4())[:8])  # Generate a unique slug
-        
+        cart = get_object_or_404(Cart, user=request.user)
+        cart_items = cart.items.all()
+        if not cart_items:
+            messages.warning(request, "Your cart is empty!")
+            return redirect('cart_detail')
+
+        total_price = sum(item.product.price * item.quantity for item in cart_items)
+        unique_slug = slugify(str(uuid.uuid4())[:8])
+
         order = Order.objects.create(
             customer=request.user,
             total_price=total_price,
             status='Pending',
             slug=unique_slug
         )
-        return redirect('order_detail', order_id=order.id)  # Use order ID instead of slug if needed
 
-    # Handle GET requests by rendering a template
+        # 💡 Now create OrderItems from cart items
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+
+        # Optional: Clear the cart
+        cart.items.all().delete()
+
+        return redirect('order_detail', order_id=order.id)
+
     return render(request, "store/order_detail.html")
 
 
