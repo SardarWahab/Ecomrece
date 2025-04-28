@@ -121,13 +121,12 @@ def place_order(request):
         
         return redirect('order_detail', order_slug=order.slug)  # use only slug, no full path
     return render(request, "store/order_detail.html")
-
 # Order Detail
 @login_required
-def order_detail(request, order_id):
-    order = get_object_or_404(Order, id=order_id, customer=request.user)
-    order_items = order.order_items.all()
-    return render(request, 'store/order_detail.html', {'order': order, 'order_items': order_items})
+def order_detail(request, order_slug):
+    order = get_object_or_404(Order, slug=order_slug)
+    
+    return render(request, 'store/order_detail.html', {'order': order})
 
 # Mark Order as Delivered (For Admin/Seller)
 @login_required
