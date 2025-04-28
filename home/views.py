@@ -107,45 +107,27 @@ def remove_from_cart(request, cart_item_id):
 @login_required
 def place_order(request):
     if request.method == "POST":
-        cart = get_object_or_404(Cart, user=request.user)
-        cart_items = cart.items.all()
-        if not cart_items:
-            messages.warning(request, "Your cart is empty!")
-            return redirect('cart_detail')
-
-        total_price = sum(item.product.price * item.quantity for item in cart_items)
-        unique_slug = slugify(str(uuid.uuid4())[:8])
-
+        total_price = 100  # Example
+        
+        # generate a random slug
+        unique_slug = slugify(str(uuid.uuid4())[:8])  # like "a1b2c3d4"
+        
         order = Order.objects.create(
             customer=request.user,
             total_price=total_price,
             status='Pending',
-            slug=unique_slug
+            slug=unique_slug  # <== very important!
         )
-
-        # 💡 Now create OrderItems from cart items
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.price
-            )
-
-        # Optional: Clear the cart
-        cart.items.all().delete()
-
-        return redirect('order_detail', order_id=order.id)
-
+        
+        return redirect('order_detail', order_slug=order.slug)  # use only slug, no full path
     return render(request, "store/order_detail.html")
-
 
 # Order Detail
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, customer=request.user)
     order_items = order.order_items.all()
-    return render(request, 'home/order_detail.html', {'order': order, 'order_items': order_items})
+    return render(request, 'store/order_detail.html', {'order': order, 'order_items': order_items})
 
 # Mark Order as Delivered (For Admin/Seller)
 @login_required
