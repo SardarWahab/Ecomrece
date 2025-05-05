@@ -17,7 +17,7 @@
     <br>
     <a href="{% url 'place_order' %}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Checkout</a>
     <form method="post" action="{% url 'place_order' %}">
-        {% csrf_token %}
+        {% csrf_token %}     
         <button type="submit" class="btn btn-success">Place Order</button>
       </form> 
    
